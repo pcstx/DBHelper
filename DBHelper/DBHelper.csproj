@@ -42,6 +42,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BaseParameters.cs" />
+    <Compile Include="CommonType.cs" />
     <Compile Include="ConnectionString.cs" />
     <Compile Include="BaseHelper.cs" />
     <Compile Include="CustomAttributes\AutoIncre.cs" />

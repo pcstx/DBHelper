@@ -10,15 +10,18 @@ using System.Reflection;
 namespace DBHelper
 {
     public partial class MysqlHelper:BaseHelper
-    {
-//        String mysqlStr = "Data Source=192.168.1.1;Password=root;User ID=root;Database=test;port=3306";
-//MySqlConnection connection = new MySqlConnection(mysqlStr);
-//connection.Open();
+    { 
         /// <summary>
         /// 数据库连接字符串
         /// </summary> 
         private static string _connectionString = ConnectionString.connectionString("MySqlHelper");
-         
+
+        public static string connectionString
+        {
+            get { return _connectionString; }
+            set { _connectionString = value; }
+        }
+
         /// <summary>
         /// 返回数据库连接对象
         /// </summary>

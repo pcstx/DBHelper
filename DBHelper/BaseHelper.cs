@@ -15,7 +15,7 @@ namespace DBHelper
         /// <summary>
         /// 数据库连接字符串
         /// </summary> 
-        private static string _connectionString = ConnectionString.connectionString();
+        public static string _connectionString = ConnectionString.connectionString();
 
         public static string connectionString
         {
@@ -68,5 +68,6 @@ namespace DBHelper
                 return str;
             }
         }
+          
     }
 }

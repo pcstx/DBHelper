@@ -198,25 +198,31 @@ namespace DBHelper
             return result;
         }
 
-        /// <summary>
-        /// 分页查询
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="t"></param>
-        /// <param name="PageIndex">当前页数</param>
-        /// <param name="pageSize">每页大小</param>
-        /// <returns></returns>
-        public static DataTable SelectPaging(PagingParam pageingParam)
+         /// <summary>
+         /// 分页查询
+         /// </summary>
+         /// <param name="pageingParam">分页条件</param>
+         /// <param name="rowNum">总行数</param>
+         /// <returns>当前页数据</returns>
+        public static DataTable SelectPaging(PagingParam pageingParam,out int rowNum)
         {
             string sql = @"  SELECT * FROM(
                                 SELECT TOP {0} ROW_NUMBER() OVER(ORDER BY {3} ASC) AS ROWID,
 		                            {4}
-                                    FROM {2}
+                                    FROM {2} with(nolock)
+                                    where 1=1 {5}
                               ) AS TEMP1 
-                                WHERE ROWID>(({1}-1)*{0})";
+                                WHERE ROWID>(({1}-1)*{0});
+            
+                                select count(*) Total from {2} with(nolock) where 1=1 {5};      
+                            ";
 
-            sql = string.Format(sql,pageingParam.pageSize,pageingParam.PageIndex,pageingParam.TableName,pageingParam.orderbyKey,pageingParam.selectRows);
-            return SqlHelper.ExecuteDataTable(sql);
+            sql = string.Format(sql,pageingParam.pageSize,pageingParam.PageIndex,pageingParam.TableName,pageingParam.orderbyKey,pageingParam.selectRows,pageingParam.whereCondition);
+            DataSet ds= SqlHelper.ExecuteDataSet(sql);
+            rowNum =CommonType.ToInt(ds.Tables[1].Rows[0][0]);
+           
+            return ds.Tables[0];
+
         }
 
     } 

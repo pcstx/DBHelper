@@ -16,7 +16,13 @@ namespace DBHelper
     public partial class SqlHelper:BaseHelper
     {
         private static string _connectionString = ConnectionString.connectionString("SqlServerHelper");
-         
+
+        public static string connectionString
+        {
+            get { return _connectionString; }
+            set { _connectionString = value; }
+        }
+
         /// <summary>
         /// 返回数据库连接对象
         /// </summary>
