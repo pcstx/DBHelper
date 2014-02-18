@@ -10,5 +10,6 @@ namespace DBHelper
 {
     public abstract class BaseHelper
     { 
+
     }
 }

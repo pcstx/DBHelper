@@ -5,6 +5,8 @@ VisualStudioVersion = 12.0.30110.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DBHelper", "DBHelper\DBHelper.csproj", "{0BBA96F8-0B51-4306-AC5A-8FD4B467AA47}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DEMO", "DEMO\DEMO.csproj", "{EDA5342B-47EC-4EB7-B007-B24C44B2FA66}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{0BBA96F8-0B51-4306-AC5A-8FD4B467AA47}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0BBA96F8-0B51-4306-AC5A-8FD4B467AA47}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0BBA96F8-0B51-4306-AC5A-8FD4B467AA47}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EDA5342B-47EC-4EB7-B007-B24C44B2FA66}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EDA5342B-47EC-4EB7-B007-B24C44B2FA66}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EDA5342B-47EC-4EB7-B007-B24C44B2FA66}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EDA5342B-47EC-4EB7-B007-B24C44B2FA66}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Reflection;
@@ -26,6 +27,36 @@ namespace DBHelper
                 return str;
             }
         }
+
+        /// <summary>
+        /// DataReader转成IEnumberable方法 
+        /// </summary>
+        /// <typeparam name="T">IEnumberable类型</typeparam>
+        /// <param name="reader"></param>
+        /// <returns></returns>
+        private static IEnumerable<T> ToIEnumerable<T>(IDataReader reader)
+        {
+            Type type = typeof(T);
+            while (reader.Read())
+            {
+                T t = System.Activator.CreateInstance<T>();
+                int fieldCount = reader.FieldCount;
+                for (int i = 0; i < fieldCount; i++)
+                {
+                    string temp = reader.GetName(i);
+                    PropertyInfo p = type.GetProperty(temp);
+                    try
+                    {
+                        p.SetValue(t, Convert.ChangeType(reader[temp], p.PropertyType), null);
+                    }
+                    catch
+                    { }
+                }
+                yield return t;
+            }
+            reader.Close();
+        }
+         
 
         /// <summary>
         /// 单表插入操作
@@ -214,5 +245,73 @@ namespace DBHelper
             return result;
         }
 
+        /// <summary>
+        /// 分页查询
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="t"></param>
+        /// <param name="PageIndex">当前页数</param>
+        /// <param name="pageSize">每页大小</param>
+        /// <returns></returns>
+        public static DataTable SelectPaging(PagingParam pageingParam)
+        {
+            string sql = @"  SELECT * FROM(
+                                SELECT TOP {0} ROW_NUMBER() OVER(ORDER BY {3} ASC) AS ROWID,
+		                            {4}
+                                    FROM {2}
+                              ) AS TEMP1 
+                                WHERE ROWID>(({1}-1)*{0})";
+
+            sql = string.Format(sql,pageingParam.pageSize,pageingParam.PageIndex,pageingParam.TableName,pageingParam.orderbyKey,pageingParam.selectRows);
+            return SqlHelper.ExecuteDataTable(sql);
+        }
+
+    }
+
+  public  class PagingParam
+    {
+        /// <summary>
+        /// 表名
+        /// </summary>
+      public  string TableName { get; set; }
+
+      private string _orderbyKey = "ID";
+       /// <summary>
+       /// 排序键名
+       /// </summary>
+        public string orderbyKey 
+       {
+           get { return _orderbyKey; }
+           set { _orderbyKey = value; }
+       }
+       private string _selectRows = "*";
+        /// <summary>
+        /// 查询字段
+        /// </summary>
+       public string selectRows 
+       {
+           get { return _selectRows; }
+           set { _selectRows = value; }
+       }
+
+       private int _PageIndex = 1;
+        /// <summary>
+        /// 当前页
+        /// </summary>
+      public  int PageIndex 
+      {
+          get { return _PageIndex; }
+          set { _PageIndex = value; }
+      }
+
+      private int _pageSize = 10;
+        /// <summary>
+        /// 每页大小
+        /// </summary>
+      public int pageSize 
+      {
+          get { return _pageSize; }
+          set { _pageSize = value; }
+      }
     }
 }

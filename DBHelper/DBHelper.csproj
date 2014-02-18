@@ -49,6 +49,7 @@
     <Compile Include="CustomAttributes\TableName.cs" />
     <Compile Include="IDBlHelper.cs" />
     <Compile Include="MysqlHelper.cs" />
+    <Compile Include="MysqlParameters.cs" />
     <Compile Include="Parameters.cs" />
     <Compile Include="SqlHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

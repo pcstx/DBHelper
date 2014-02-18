@@ -83,35 +83,7 @@ namespace DBHelper
             }
         }
 
-        /// <summary>
-        /// DataReader转成IEnumberable方法 
-        /// </summary>
-        /// <typeparam name="T">IEnumberable类型</typeparam>
-        /// <param name="reader"></param>
-        /// <returns></returns>
-        private static IEnumerable<T> ToIEnumerable<T>(IDataReader reader)
-        {
-            Type type = typeof(T); 
-            while (reader.Read())
-            {
-                T t = System.Activator.CreateInstance<T>();
-                int fieldCount = reader.FieldCount;
-                for (int i = 0; i < fieldCount; i++)
-                {
-                    string temp = reader.GetName(i);
-                    PropertyInfo p = type.GetProperty(temp);
-                    try
-                    {
-                        p.SetValue(t, Convert.ChangeType(reader[temp], p.PropertyType), null);
-                    }
-                    catch
-                    { } 
-                }
-                yield return t; 
-            }
-            reader.Close(); 
-        }
-         
+      
 
          /// <summary>
          /// 执行SQL语句，返回是否成功
