@@ -9,55 +9,8 @@ using System.Threading.Tasks;
 
 namespace DBHelper
 {
-    public partial class SqlHelper
-    {
-        /// <summary>
-        /// 删除最后一个字符
-        /// </summary>
-        /// <param name="str">要删除的字符串</param>
-        /// <returns></returns>
-        private static string DelLastChar(string str)
-        {
-            if (!string.IsNullOrEmpty(str) && str.Length > 0)
-            {
-                return str.Substring(0, str.Length - 1);
-            }
-            else
-            {
-                return str;
-            }
-        }
-
-        /// <summary>
-        /// DataReader转成IEnumberable方法 
-        /// </summary>
-        /// <typeparam name="T">IEnumberable类型</typeparam>
-        /// <param name="reader"></param>
-        /// <returns></returns>
-        private static IEnumerable<T> ToIEnumerable<T>(IDataReader reader)
-        {
-            Type type = typeof(T);
-            while (reader.Read())
-            {
-                T t = System.Activator.CreateInstance<T>();
-                int fieldCount = reader.FieldCount;
-                for (int i = 0; i < fieldCount; i++)
-                {
-                    string temp = reader.GetName(i);
-                    PropertyInfo p = type.GetProperty(temp);
-                    try
-                    {
-                        p.SetValue(t, Convert.ChangeType(reader[temp], p.PropertyType), null);
-                    }
-                    catch
-                    { }
-                }
-                yield return t;
-            }
-            reader.Close();
-        }
-         
-
+    public partial class SqlHelper:BaseHelper
+    { 
         /// <summary>
         /// 单表插入操作
         /// </summary>
@@ -266,52 +219,5 @@ namespace DBHelper
             return SqlHelper.ExecuteDataTable(sql);
         }
 
-    }
-
-  public  class PagingParam
-    {
-        /// <summary>
-        /// 表名
-        /// </summary>
-      public  string TableName { get; set; }
-
-      private string _orderbyKey = "ID";
-       /// <summary>
-       /// 排序键名
-       /// </summary>
-        public string orderbyKey 
-       {
-           get { return _orderbyKey; }
-           set { _orderbyKey = value; }
-       }
-       private string _selectRows = "*";
-        /// <summary>
-        /// 查询字段
-        /// </summary>
-       public string selectRows 
-       {
-           get { return _selectRows; }
-           set { _selectRows = value; }
-       }
-
-       private int _PageIndex = 1;
-        /// <summary>
-        /// 当前页
-        /// </summary>
-      public  int PageIndex 
-      {
-          get { return _PageIndex; }
-          set { _PageIndex = value; }
-      }
-
-      private int _pageSize = 10;
-        /// <summary>
-        /// 每页大小
-        /// </summary>
-      public int pageSize 
-      {
-          get { return _pageSize; }
-          set { _pageSize = value; }
-      }
-    }
+    } 
 }

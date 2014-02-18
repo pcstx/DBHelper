@@ -8,42 +8,17 @@ using System.Threading.Tasks;
 
 namespace DBHelper
 {
-   public class MysqlParameters
-    { 
-           private CommandType _cmdType = CommandType.Text;
-           private int _commandTimeout = 30;
-
-           /// <summary>
-           /// 连接字符串名称
-           /// </summary>
-           public string connectionStringName { get; set; }
-
-           /// <summary>
-           /// 操作类型;sql语句或存储过程
-           /// </summary>
-           public CommandType cmdType
-           {
-               get { return _cmdType; }
-               set { _cmdType = value; }
-           }
-
+   public class MysqlParameters:BaseParameters
+    {  
            /// <summary>
            /// 参数集合
            /// </summary>
-           public MySqlParameterCollection commandParameters { get; set; }
+           public new MySqlParameterCollection commandParameters { get; set; }
 
            /// <summary>
            /// 事务
            /// </summary>
-           public MySqlTransaction tran { get; set; }
-
-           /// <summary>
-           /// 超时时间
-           /// </summary>
-           public int CommandTimeout
-           {
-               get { return _commandTimeout; }
-               set { _commandTimeout = value; }
-           } 
+           public new MySqlTransaction tran { get; set; }
+        
     }
 }

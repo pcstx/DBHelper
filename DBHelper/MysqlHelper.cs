@@ -9,7 +9,7 @@ using System.Reflection;
 
 namespace DBHelper
 {
-    public class MysqlHelper
+    public partial class MysqlHelper:BaseHelper
     {
 //        String mysqlStr = "Data Source=192.168.1.1;Password=root;User ID=root;Database=test;port=3306";
 //MySqlConnection connection = new MySqlConnection(mysqlStr);
@@ -18,13 +18,7 @@ namespace DBHelper
         /// 数据库连接字符串
         /// </summary> 
         private static string _connectionString = ConnectionString.connectionString("MySqlHelper");
-
-        public static string connectionString
-        {
-            get { return _connectionString; }
-            set { _connectionString = value; }
-        }
-
+         
         /// <summary>
         /// 返回数据库连接对象
         /// </summary>
@@ -303,35 +297,6 @@ namespace DBHelper
         public static IEnumerable<T> ExecuteIEnumerable<T>(string sql, MysqlParameters param)
         {
             return ExecuteIEnumerable<T>(sql, param.connectionStringName, param.cmdType, param.commandParameters, param.tran, param.CommandTimeout);
-        }
-
-        /// <summary>
-        /// DataReader转成IEnumberable方法 
-        /// </summary>
-        /// <typeparam name="T">IEnumberable类型</typeparam>
-        /// <param name="reader"></param>
-        /// <returns></returns>
-        private static IEnumerable<T> ToIEnumerable<T>(IDataReader reader)
-        {
-            Type type = typeof(T);
-            while (reader.Read())
-            {
-                T t = System.Activator.CreateInstance<T>();
-                int fieldCount = reader.FieldCount;
-                for (int i = 0; i < fieldCount; i++)
-                {
-                    string temp = reader.GetName(i);
-                    PropertyInfo p = type.GetProperty(temp);
-                    try
-                    {
-                        p.SetValue(t, Convert.ChangeType(reader[temp], p.PropertyType), null);
-                    }
-                    catch
-                    { }
-                }
-                yield return t;
-            }
-            reader.Close();
         }
          
     }

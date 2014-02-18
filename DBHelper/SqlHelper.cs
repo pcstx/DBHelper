@@ -13,19 +13,10 @@ namespace DBHelper
    /// <summary>
    /// SQL Server操作类
    /// </summary>
-    public partial class SqlHelper
-    { 
-        /// <summary>
-        /// 数据库连接字符串
-        /// </summary> 
-        private static string _connectionString = ConnectionString.connectionString();
-
-        public static string connectionString 
-        {
-            get { return _connectionString; }
-            set { _connectionString = value; }
-        }
-
+    public partial class SqlHelper:BaseHelper
+    {
+        private static string _connectionString = ConnectionString.connectionString("SqlServerHelper");
+         
         /// <summary>
         /// 返回数据库连接对象
         /// </summary>
@@ -82,9 +73,7 @@ namespace DBHelper
                    
             }
         }
-
-      
-
+         
          /// <summary>
          /// 执行SQL语句，返回是否成功
          /// </summary>
@@ -112,7 +101,7 @@ namespace DBHelper
             return result;
         }
 
-        public static int ExecteNonQuery(string sql, Parameters param)
+        public static int ExecteNonQuery(string sql, SqlParameters param)
         {
             return ExecteNonQuery(sql,param.connectionStringName,param.cmdType,param.commandParameters,param.tran,param.CommandTimeout);
         }
@@ -170,7 +159,7 @@ namespace DBHelper
             return sdr;
         }
 
-        public static IDataReader ExecuteReader(string sql, Parameters param)
+        public static IDataReader ExecuteReader(string sql, SqlParameters param)
         {
             return ExecuteReader(sql, param.connectionStringName, param.cmdType, param.commandParameters, param.tran, param.CommandTimeout);
         }
@@ -226,8 +215,8 @@ namespace DBHelper
 
             return obj;
         }
-         
-        public static object ExecuteScalar(string sql, Parameters param)
+
+        public static object ExecuteScalar(string sql, SqlParameters param)
         {
             return ExecuteScalar(sql, param.connectionStringName, param.cmdType, param.commandParameters, param.tran, param.CommandTimeout);
         }
@@ -262,7 +251,7 @@ namespace DBHelper
             return ds;
         }
 
-        public static DataSet ExecuteDataSet(string sql, Parameters param)
+        public static DataSet ExecuteDataSet(string sql, SqlParameters param)
         {
             return ExecuteDataSet(sql, param.connectionStringName, param.cmdType, param.commandParameters, param.tran, param.CommandTimeout);
         }
@@ -288,7 +277,7 @@ namespace DBHelper
             return dt;
         }
 
-        public static DataTable ExecuteDataTable(string sql, Parameters param)
+        public static DataTable ExecuteDataTable(string sql, SqlParameters param)
         {
             return ExecuteDataTable(sql, param.connectionStringName, param.cmdType, param.commandParameters, param.tran, param.CommandTimeout);
 
@@ -324,7 +313,7 @@ namespace DBHelper
             return Ienum;
         }
 
-        public static IEnumerable<T> ExecuteIEnumerable<T>(string sql, Parameters param)
+        public static IEnumerable<T> ExecuteIEnumerable<T>(string sql, SqlParameters param)
         {
             return ExecuteIEnumerable<T>(sql, param.connectionStringName, param.cmdType, param.commandParameters, param.tran, param.CommandTimeout);
         }
