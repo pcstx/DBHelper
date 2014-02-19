@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace DBHelper
 {
-    public abstract class BaseHelper
+    public class BaseHelper
     { 
         /// <summary>
         /// 数据库连接字符串

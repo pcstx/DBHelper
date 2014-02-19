@@ -11,13 +11,18 @@ namespace DEMO.Controllers
     public class HomeController : Controller
     {
         public ActionResult Index()
-        {
+        { 
             //string sql = @" insert into test.user(Name,Age) Values('myname',12); ";
             //MysqlHelper.ExecteNonQuery(sql);
             SqlHelper.connectionString = @"server=PC;uid=sa;pwd=sa;";
+            Models.VistorEntity ve = new Models.VistorEntity();
+            ve.ID = 104;
+          int i=   SqlHelper.Delete(ve);
+
             PagingParam pp = new PagingParam();
             pp.TableName = "[website].[dbo].[Vistor]";
-            DataTable dt= SqlHelper.SelectPaging(pp);
+            int rowNum = 0;
+            DataTable dt = SqlHelper.SelectPaging(pp,out rowNum);
             return View();
         }
 

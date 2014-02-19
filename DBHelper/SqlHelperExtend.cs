@@ -76,7 +76,7 @@ namespace DBHelper
         /// <param name="whereT">更新条件字符串</param>
         /// <param name="TableName">更新的表名</param>
         /// <returns>受影响行数</returns>
-        public static int Update<T>(T t, string whereT = null, string TableName = null)
+        public static int Update<T>(T t, string whereT, string TableName = null)
         {
             string sql = @" UPDATE {0}
                                SET {1}
@@ -224,6 +224,83 @@ namespace DBHelper
             return ds.Tables[0];
 
         }
+
+        /// <summary>
+        /// 删除表
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="t"></param>
+        /// <param name="TableName"></param>
+        /// <returns></returns>
+        public static int Delete<T>(T t, string TableName = null)
+        {
+            string sql = @" DELETE FROM {0} where 1=1 {1} ";
+            string attributes = ""; 
+            SqlParameterCollection sqlParamCollection = new SqlCommand().Parameters;
+            Type type = typeof(T);
+            PropertyInfo[] pi = type.GetProperties();
+
+            foreach (PropertyInfo p in pi)
+            {
+                bool hasKey = Attribute.IsDefined(p, typeof(CustomAttributes.Key)); //判断是否是[主键]特性 
+                object value = p.GetValue(t, null);
+                string name = p.Name;
+                if (value != null && hasKey)
+                {
+                    attributes +=" and "+ name + "=" + "@" + name; 
+                    sqlParamCollection.Add(new SqlParameter("@" + name, value));
+                }
+            }
+
+            if (string.IsNullOrEmpty(TableName))
+            {
+                Attribute attr = Attribute.GetCustomAttribute(type, typeof(CustomAttributes.TableName));
+                CustomAttributes.TableName a = (CustomAttributes.TableName)attr;
+                TableName = a.GetTableName();
+            }
+            sql = string.Format(sql, TableName, attributes);
+
+           int r=  SqlHelper.ExecteNonQuery(sql,null,CommandType.Text, sqlParamCollection);
+           return r;
+        }
+
+        public static int Delete<T>(T t,string whereT, string TableName = null)
+        {
+            string sql = @" DELETE FROM {0} where 1=1 {2}  {1} ";
+            string attributes = "";
+            string wherecondition = "";
+            SqlParameterCollection sqlParamCollection = new SqlCommand().Parameters;
+            Type type = typeof(T);
+            PropertyInfo[] pi = type.GetProperties();
+
+            if (whereT != null)
+            {
+                wherecondition += (string)whereT;
+            } 
+            foreach (PropertyInfo p in pi)
+            {
+                bool hasKey = Attribute.IsDefined(p, typeof(CustomAttributes.Key)); //判断是否是[主键]特性 
+                object value = p.GetValue(t, null);
+                string name = p.Name;
+                if (value != null && hasKey)
+                {
+                    attributes += " and " + name + "=" + "@" + name;
+                    sqlParamCollection.Add(new SqlParameter("@" + name, value));
+                }
+            }
+
+            if (string.IsNullOrEmpty(TableName))
+            {
+                Attribute attr = Attribute.GetCustomAttribute(type, typeof(CustomAttributes.TableName));
+                CustomAttributes.TableName a = (CustomAttributes.TableName)attr;
+                TableName = a.GetTableName();
+            }
+            sql = string.Format(sql, TableName, attributes,wherecondition);
+
+            int r = SqlHelper.ExecteNonQuery(sql, null, CommandType.Text, sqlParamCollection);
+            return r;
+        }
+
 
     } 
 }
