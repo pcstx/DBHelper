@@ -11,18 +11,7 @@ using System.Threading.Tasks;
 namespace DBHelper
 {
     public class BaseHelper
-    { 
-        /// <summary>
-        /// 数据库连接字符串
-        /// </summary> 
-        public static string _connectionString = ConnectionString.connectionString();
-
-        public static string connectionString
-        {
-            get { return _connectionString; }
-            set { _connectionString = value; }
-        }
-
+    {   
         /// <summary>
         /// DataReader转成IEnumberable方法 
         /// </summary>
