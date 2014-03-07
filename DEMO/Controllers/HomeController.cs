@@ -11,9 +11,16 @@ namespace DEMO.Controllers
     public class HomeController : Controller
     {
         public ActionResult Index()
-        { 
-            //string sql = @" insert into test.user(Name,Age) Values('myname',12); ";
-            //MysqlHelper.ExecteNonQuery(sql);
+        {
+            //string sql = @" insert into [website].[dbo].[User]([UserName],[Sex]) Values('myname',12); ";
+            //for (int i = 0; i < 20;i++ )
+            //{
+            //    SqlHelper.ExecteNonQuery(sql);
+            //}
+
+            string sql = @" select top 1 UserName from [website].[dbo].[User] ";
+           long   abc=  SqlHelper.ExecuteFirst<long>(sql);
+            /*
             SqlHelper.connectionString = @"server=PC;uid=sa;pwd=sa;";
             Models.VistorEntity ve = new Models.VistorEntity();
             ve.ID = 104;
@@ -23,7 +30,8 @@ namespace DEMO.Controllers
             pp.TableName = "[website].[dbo].[Vistor]";
             int rowNum = 0;
             DataTable dt = SqlHelper.SelectPaging(pp,out rowNum);
-            return View();
+             */
+            return View(abc);
         }
 
         public ActionResult About()

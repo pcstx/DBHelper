@@ -14,7 +14,7 @@ namespace DBHelper
    /// SQL Server操作类
    /// </summary>
     public partial class SqlHelper:BaseHelper
-    {
+    { 
         private static string _connectionString = ConnectionString.connectionString("SqlServerHelper");
 
         public static string connectionString
@@ -27,26 +27,7 @@ namespace DBHelper
         /// 返回数据库连接对象
         /// </summary>
         /// <returns></returns>
-        private static  SqlConnection GetConnection(string connStr=null)
-        {
-            if (string.IsNullOrEmpty(connStr)) {
-                connStr = connectionString;
-            }
-            SqlConnection conn = new SqlConnection(connStr);
-            conn.Open();
-            return conn;        
-        }
-
-        /// <summary>
-        /// 为执行命令准备参数
-        /// </summary>
-        /// <param name="cmd">SqlCommand 命令</param>
-        /// <param name="conn">已经存在的数据库连接</param>
-        /// <param name="trans">数据库事物处理</param>
-        /// <param name="cmdType">SqlCommand命令类型 (存储过程， T-SQL语句， 等等。)</param>
-        /// <param name="cmdText">Command text，T-SQL语句 例如 Select * from Products</param>
-        /// <param name="cmdParms">返回带参数的命令</param>
-        private static void PrepareCommand(SqlCommand cmd, string sql, string connectionStringName, CommandType cmdType, SqlParameterCollection commandParameters, SqlTransaction tran, int CommandTimeout)
+        private static SqlConnection GetConnection(string connectionStringName = null)
         {
             string connstr;
             if (string.IsNullOrEmpty(connectionStringName))
@@ -56,9 +37,26 @@ namespace DBHelper
             else
             {
                 connstr = ConnectionString.connectionString(connectionStringName);
-            }
+            } 
 
-            cmd.Connection = GetConnection(connstr);
+            SqlConnection conn = new SqlConnection(connstr);
+            conn.Open();
+            return conn;        
+        }
+
+      /// <summary>
+      ///  为执行命令准备参数
+      /// </summary>
+      /// <param name="cmd">SqlCommand 命令</param>
+      /// <param name="sql">执行SQL语句</param>
+        /// <param name="conn">已经存在的数据库连接</param>
+        /// <param name="cmdType">SqlCommand命令类型 (存储过程， T-SQL语句， 等等。)</param>
+        /// <param name="commandParameters">返回带参数的命令</param>
+        /// <param name="tran">数据库事物处理</param>
+      /// <param name="CommandTimeout">超时时间</param>
+        private static void PrepareCommand(SqlCommand cmd, string sql, SqlConnection conn, CommandType cmdType, SqlParameterCollection commandParameters, SqlTransaction tran, int CommandTimeout)
+        {
+            cmd.Connection = conn;
             cmd.CommandText = sql;
             //判断是否需要事物处理
             if (tran != null) 
@@ -73,13 +71,11 @@ namespace DBHelper
                 foreach (SqlParameter parm in commandParameters)
                 {
                     SqlParameter pp = (SqlParameter)((ICloneable)parm).Clone();
-                    cmd.Parameters.Add(pp);
-                    
-                }
-                   
+                    cmd.Parameters.Add(pp);                    
+                }                   
             }
         }
-         
+          
          /// <summary>
          /// 执行SQL语句，返回是否成功
          /// </summary>
@@ -93,10 +89,13 @@ namespace DBHelper
             int result = 0; 
             try
             {
-                using (SqlCommand cmd = new SqlCommand())
+                using (SqlConnection conn = GetConnection(connectionStringName))
                 {
-                    PrepareCommand(cmd, sql, connectionStringName, cmdType, commandParameters, tran, CommandTimeout);
-                    result = cmd.ExecuteNonQuery();
+                    using (SqlCommand cmd = new SqlCommand())
+                    {
+                        PrepareCommand(cmd, sql, conn, cmdType, commandParameters, tran, CommandTimeout); 
+                        result = cmd.ExecuteNonQuery();
+                    }
                 }
             }
             catch (Exception ex)
@@ -117,15 +116,19 @@ namespace DBHelper
             int result = 0;
             try
             {
-                using (SqlCommand cmd = new SqlCommand())
+                using (SqlConnection conn = GetConnection(connectionStringName))
                 {
-                    PrepareCommand(cmd, sql, connectionStringName, cmdType, commandParameters, tran, CommandTimeout);
-                    IAsyncResult asyncResult = cmd.BeginExecuteNonQuery();
-                    while (!asyncResult.IsCompleted) //异步待定完成
+                    using (SqlCommand cmd = new SqlCommand())
                     {
-                      
+                        PrepareCommand(cmd, sql, conn, cmdType, commandParameters, tran, CommandTimeout);
+                        IAsyncResult asyncResult = cmd.BeginExecuteNonQuery();
+                        while (!asyncResult.IsCompleted) //异步待定完成
+                        {
+
+                        }
+                        result = cmd.EndExecuteNonQuery(asyncResult);
+                       // cmd.Connection.Close();
                     }
-                    result = cmd.EndExecuteNonQuery(asyncResult);
                 }
             }
             catch (Exception ex)
@@ -151,10 +154,13 @@ namespace DBHelper
             SqlDataReader sdr;
             try
             {
-                using (SqlCommand cmd = new SqlCommand())
+                using (SqlConnection conn = GetConnection(connectionStringName))
                 {
-                    PrepareCommand(cmd, sql,connectionStringName, cmdType, commandParameters, tran, CommandTimeout);
-                    sdr = cmd.ExecuteReader(CommandBehavior.CloseConnection);  
+                    using (SqlCommand cmd = new SqlCommand())
+                    {
+                        PrepareCommand(cmd, sql, conn, cmdType, commandParameters, tran, CommandTimeout);
+                        sdr = cmd.ExecuteReader(CommandBehavior.CloseConnection); 
+                    }
                 }
             }
             catch (Exception ex)
@@ -175,15 +181,19 @@ namespace DBHelper
             SqlDataReader sdr=null;
             try
             {
-                using (SqlCommand cmd = new SqlCommand())
+                using (SqlConnection conn = GetConnection(connectionStringName))
                 {
-                    PrepareCommand(cmd, sql, connectionStringName, cmdType, commandParameters, tran, CommandTimeout);
-                    IAsyncResult asyncResult = cmd.BeginExecuteReader(CommandBehavior.CloseConnection);
-                    while (!asyncResult.IsCompleted)
+                    using (SqlCommand cmd = new SqlCommand())
                     {
-                       
+                        PrepareCommand(cmd, sql, conn, cmdType, commandParameters, tran, CommandTimeout);
+                        IAsyncResult asyncResult = cmd.BeginExecuteReader(CommandBehavior.CloseConnection);
+                        while (!asyncResult.IsCompleted)
+                        {
+
+                        }
+                        sdr = cmd.EndExecuteReader(asyncResult);
+                       // cmd.Connection.Close();
                     }
-                    sdr = cmd.EndExecuteReader(asyncResult);
                 }
             }
             catch (Exception ex)
@@ -208,11 +218,14 @@ namespace DBHelper
             object obj;
             try
             {
-                using (SqlCommand cmd = new SqlCommand())
+                using (SqlConnection conn = GetConnection(connectionStringName))
                 {
-                    PrepareCommand(cmd, sql, connectionStringName, cmdType, commandParameters, tran, CommandTimeout);
-                    obj = cmd.ExecuteScalar(); 
-                }
+                    using (SqlCommand cmd = new SqlCommand())
+                    {
+                        PrepareCommand(cmd, sql, conn, cmdType, commandParameters, tran, CommandTimeout); 
+                        obj = cmd.ExecuteScalar(); 
+                    }
+                } 
             }
             catch (Exception ex)
             {
@@ -226,7 +239,36 @@ namespace DBHelper
         {
             return ExecuteScalar(sql, param.connectionStringName, param.cmdType, param.commandParameters, param.tran, param.CommandTimeout);
         }
- 
+
+        /// <summary>
+        /// 返回单个元素
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="sql"></param>
+        /// <param name="connectionStringName"></param>
+        /// <param name="cmdType"></param>
+        /// <param name="commandParameters"></param>
+        /// <param name="tran"></param>
+        /// <param name="CommandTimeout"></param>
+        /// <returns></returns>
+        public static T ExecuteFirst<T>(string sql, string connectionStringName = null, CommandType cmdType = CommandType.Text, SqlParameterCollection commandParameters = null, SqlTransaction tran = null, int CommandTimeout = 30)
+        {
+            object first= ExecuteScalar(sql, connectionStringName, cmdType, commandParameters, tran, CommandTimeout);
+            if (first is T)
+            {
+                return (T)first;
+            }
+            else
+            {
+                return default(T);
+            }
+        }
+
+        public static T ExecuteFirst<T>(string sql, SqlParameters param)
+        {
+            return ExecuteFirst<T>(sql, param.connectionStringName, param.cmdType, param.commandParameters, param.tran, param.CommandTimeout);
+        }
+
         /// <summary>
         /// 返回DataSet
         /// </summary>
@@ -241,13 +283,17 @@ namespace DBHelper
             DataSet ds = new DataSet();
             try
             {
-                using (SqlCommand cmd = new SqlCommand())
+                using (SqlConnection conn = GetConnection(connectionStringName))
                 {
-                    PrepareCommand(cmd, sql, connectionStringName, cmdType, commandParameters, tran, CommandTimeout);
-                    SqlDataAdapter da = new SqlDataAdapter(); 
-                    da.SelectCommand = cmd;
-                    da.Fill(ds);
-                }                
+                    using (SqlCommand cmd = new SqlCommand())
+                    {
+                        PrepareCommand(cmd, sql, conn, cmdType, commandParameters, tran, CommandTimeout);
+                        SqlDataAdapter da = new SqlDataAdapter();
+                        da.SelectCommand = cmd;
+                        da.Fill(ds);
+                       // cmd.Connection.Close();
+                    }
+                }         
             }
             catch(Exception ex)
             {
@@ -266,13 +312,18 @@ namespace DBHelper
         {
             DataTable dt = new DataTable();
             try
-            {
-                using (SqlCommand cmd = new SqlCommand())
+            { 
+                using (SqlConnection conn = GetConnection(connectionStringName))
                 {
-                    PrepareCommand(cmd, sql, connectionStringName, cmdType, commandParameters, tran, CommandTimeout);
-                    SqlDataAdapter da = new SqlDataAdapter();
-                    da.SelectCommand = cmd;
-                    da.Fill(dt);
+                    using (SqlCommand cmd = new SqlCommand())
+                    {
+                        PrepareCommand(cmd, sql, conn, cmdType, commandParameters, tran, CommandTimeout);
+                       // cmd.Connection = conn;
+                        SqlDataAdapter da = new SqlDataAdapter();
+                        da.SelectCommand = cmd;
+                        da.Fill(dt);
+                       // cmd.Connection.Close();
+                    }
                 }
             }
             catch (Exception ex)
@@ -303,24 +354,32 @@ namespace DBHelper
         {
             IEnumerable<T> Ienum;
             try
-            {
-                using (SqlCommand cmd = new SqlCommand())
+            { 
+                using(SqlConnection conn=GetConnection(connectionStringName))
                 {
-                    PrepareCommand(cmd, sql,connectionStringName, cmdType, commandParameters, tran, CommandTimeout);
-                    SqlDataReader sdr = cmd.ExecuteReader(CommandBehavior.CloseConnection);
-                    Ienum= ToIEnumerable<T>(sdr);
-                }
+                    using (SqlCommand cmd = new SqlCommand())
+                    {
+                        PrepareCommand(cmd, sql, conn, cmdType, commandParameters, tran, CommandTimeout);
+                      //  cmd.Connection = conn;
+                        SqlDataReader sdr = cmd.ExecuteReader();// cmd.ExecuteReader(CommandBehavior.CloseConnection);
+                        Ienum = ToIEnumerable<T>(sdr); 
+                    }
+                } 
             }
             catch (Exception ex)
             {
                 throw ex;
             }
-
+             
             return Ienum;
         }
 
         public static IEnumerable<T> ExecuteIEnumerable<T>(string sql, SqlParameters param)
         {
+            if (param == null)
+            {
+                param = new SqlParameters();
+            }
             return ExecuteIEnumerable<T>(sql, param.connectionStringName, param.cmdType, param.commandParameters, param.tran, param.CommandTimeout);
         }
 

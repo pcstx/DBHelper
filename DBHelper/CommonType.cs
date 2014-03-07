@@ -20,11 +20,40 @@ namespace DBHelper
        public static int ToInt(object obj,int defaultValue=0)
        {
            int value = 0;
-
-           if (!(obj != null && int.TryParse(obj.ToString(), out value)))
+           try
+           {
+               if (!(obj != null && int.TryParse(obj.ToString(), out value)))
+               {
+                   value = defaultValue;
+               }
+           }
+           catch
            {
                value = defaultValue;
-           }  
+           }
+           return value;
+       }
+
+       public static string ToString(object obj, string defalutValue = "")
+       {
+           string value = "";
+
+           try
+           {
+               if (obj != null)
+               {
+                   value = obj.ToString();
+               }
+               else
+               {
+                   value = defalutValue;
+               }
+           }
+           catch
+           {
+               value = defalutValue;
+           }
+
            return value;
        }
 

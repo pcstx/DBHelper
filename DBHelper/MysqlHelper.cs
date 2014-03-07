@@ -26,27 +26,7 @@ namespace DBHelper
         /// 返回数据库连接对象
         /// </summary>
         /// <returns></returns>
-        private static MySqlConnection GetConnection(string connStr = null)
-        {
-            if (string.IsNullOrEmpty(connStr))
-            {
-                connStr = connectionString;
-            }
-            MySqlConnection conn = new MySqlConnection(connStr);
-            conn.Open();
-            return conn;
-        }
-
-        /// <summary>
-        /// 为执行命令准备参数
-        /// </summary>
-        /// <param name="cmd">SqlCommand 命令</param>
-        /// <param name="conn">已经存在的数据库连接</param>
-        /// <param name="trans">数据库事物处理</param>
-        /// <param name="cmdType">SqlCommand命令类型 (存储过程， T-SQL语句， 等等。)</param>
-        /// <param name="cmdText">Command text，T-SQL语句 例如 Select * from Products</param>
-        /// <param name="cmdParms">返回带参数的命令</param>
-        private static void PrepareCommand(MySqlCommand cmd, string sql, string connectionStringName, CommandType cmdType, MySqlParameterCollection commandParameters, MySqlTransaction tran, int CommandTimeout)
+        private static MySqlConnection GetConnection(string connectionStringName = null)
         {
             string connstr;
             if (string.IsNullOrEmpty(connectionStringName))
@@ -58,7 +38,23 @@ namespace DBHelper
                 connstr = ConnectionString.connectionString(connectionStringName);
             }
 
-            cmd.Connection = GetConnection(connstr);
+            MySqlConnection conn = new MySqlConnection(connstr);
+            conn.Open();
+            return conn;        
+        }
+
+        /// <summary>
+        /// 为执行命令准备参数
+        /// </summary>
+        /// <param name="cmd">SqlCommand 命令</param>
+        /// <param name="conn">已经存在的数据库连接</param>
+        /// <param name="trans">数据库事物处理</param>
+        /// <param name="cmdType">SqlCommand命令类型 (存储过程， T-SQL语句， 等等。)</param>
+        /// <param name="cmdText">Command text，T-SQL语句 例如 Select * from Products</param>
+        /// <param name="cmdParms">返回带参数的命令</param>
+        private static void PrepareCommand(MySqlCommand cmd, string sql, MySqlConnection conn, CommandType cmdType, MySqlParameterCollection commandParameters, MySqlTransaction tran, int CommandTimeout)
+        {
+            cmd.Connection = conn;
             cmd.CommandText = sql;
             //判断是否需要事物处理
             if (tran != null)
@@ -94,10 +90,13 @@ namespace DBHelper
             int result = 0;
             try
             {
-                using (MySqlCommand cmd = new MySqlCommand())
-                {
-                    PrepareCommand(cmd, sql, connectionStringName, cmdType, commandParameters, tran, CommandTimeout);
-                    result = cmd.ExecuteNonQuery();
+                using (MySqlConnection conn = GetConnection(connectionStringName))
+                { 
+                    using (MySqlCommand cmd = new MySqlCommand())
+                    {
+                        PrepareCommand(cmd, sql, conn, cmdType, commandParameters, tran, CommandTimeout);
+                        result = cmd.ExecuteNonQuery();
+                    }
                 }
             }
             catch (Exception ex)
@@ -129,10 +128,13 @@ namespace DBHelper
             MySqlDataReader sdr;
             try
             {
-                using (MySqlCommand cmd = new MySqlCommand())
+                using (MySqlConnection conn = GetConnection(connectionStringName))
                 {
-                    PrepareCommand(cmd, sql, connectionStringName, cmdType, commandParameters, tran, CommandTimeout);
-                    sdr = cmd.ExecuteReader(CommandBehavior.CloseConnection);
+                    using (MySqlCommand cmd = new MySqlCommand())
+                    {
+                        PrepareCommand(cmd, sql, conn, cmdType, commandParameters, tran, CommandTimeout);
+                        sdr = cmd.ExecuteReader(CommandBehavior.CloseConnection);
+                    }
                 }
             }
             catch (Exception ex)
@@ -153,15 +155,18 @@ namespace DBHelper
             MySqlDataReader sdr = null;
             try
             {
-                using (MySqlCommand cmd = new MySqlCommand())
+                using (MySqlConnection conn = GetConnection(connectionStringName))
                 {
-                    PrepareCommand(cmd, sql, connectionStringName, cmdType, commandParameters, tran, CommandTimeout);
-                    IAsyncResult asyncResult = cmd.BeginExecuteReader(CommandBehavior.CloseConnection);
-                    while (!asyncResult.IsCompleted)
+                    using (MySqlCommand cmd = new MySqlCommand())
                     {
+                        PrepareCommand(cmd, sql, conn, cmdType, commandParameters, tran, CommandTimeout);
+                        IAsyncResult asyncResult = cmd.BeginExecuteReader(CommandBehavior.CloseConnection);
+                        while (!asyncResult.IsCompleted)
+                        {
 
+                        }
+                        sdr = cmd.EndExecuteReader(asyncResult);
                     }
-                    sdr = cmd.EndExecuteReader(asyncResult);
                 }
             }
             catch (Exception ex)
@@ -186,10 +191,13 @@ namespace DBHelper
             object obj;
             try
             {
-                using (MySqlCommand cmd = new MySqlCommand())
+                using (MySqlConnection conn = GetConnection(connectionStringName))
                 {
-                    PrepareCommand(cmd, sql, connectionStringName, cmdType, commandParameters, tran, CommandTimeout);
-                    obj = cmd.ExecuteScalar();
+                    using (MySqlCommand cmd = new MySqlCommand())
+                    {
+                        PrepareCommand(cmd, sql, conn, cmdType, commandParameters, tran, CommandTimeout);
+                        obj = cmd.ExecuteScalar();
+                    }
                 }
             }
             catch (Exception ex)
@@ -206,6 +214,35 @@ namespace DBHelper
         }
 
         /// <summary>
+        /// 返回单个元素
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="sql"></param>
+        /// <param name="connectionStringName"></param>
+        /// <param name="cmdType"></param>
+        /// <param name="commandParameters"></param>
+        /// <param name="tran"></param>
+        /// <param name="CommandTimeout"></param>
+        /// <returns></returns>
+        public static T ExecuteFirst<T>(string sql, string connectionStringName = null, CommandType cmdType = CommandType.Text, MySqlParameterCollection commandParameters = null, MySqlTransaction tran = null, int CommandTimeout = 30)
+        {
+            object first = ExecuteScalar(sql, connectionStringName, cmdType, commandParameters, tran, CommandTimeout);
+            if (first is T)
+            {
+                return (T)first;
+            }
+            else
+            {
+                return default(T);
+            }
+        }
+
+        public static T ExecuteFirst<T>(string sql, MysqlParameters param)
+        {
+            return ExecuteFirst<T>(sql, param.connectionStringName, param.cmdType, param.commandParameters, param.tran, param.CommandTimeout);
+        }
+
+        /// <summary>
         /// 返回DataSet
         /// </summary>
         /// <param name="sql"></param>
@@ -219,12 +256,15 @@ namespace DBHelper
             DataSet ds = new DataSet();
             try
             {
-                using (MySqlCommand cmd = new MySqlCommand())
+                using (MySqlConnection conn = GetConnection(connectionStringName))
                 {
-                    PrepareCommand(cmd, sql, connectionStringName, cmdType, commandParameters, tran, CommandTimeout);
-                    MySqlDataAdapter da = new MySqlDataAdapter();
-                    da.SelectCommand = cmd;
-                    da.Fill(ds);
+                    using (MySqlCommand cmd = new MySqlCommand())
+                    {
+                        PrepareCommand(cmd, sql, conn, cmdType, commandParameters, tran, CommandTimeout);
+                        MySqlDataAdapter da = new MySqlDataAdapter();
+                        da.SelectCommand = cmd;
+                        da.Fill(ds);
+                    }
                 }
             }
             catch (Exception ex)
@@ -245,12 +285,15 @@ namespace DBHelper
             DataTable dt = new DataTable();
             try
             {
-                using (MySqlCommand cmd = new MySqlCommand())
+                using (MySqlConnection conn = GetConnection(connectionStringName))
                 {
-                    PrepareCommand(cmd, sql, connectionStringName, cmdType, commandParameters, tran, CommandTimeout);
-                    MySqlDataAdapter da = new MySqlDataAdapter();
-                    da.SelectCommand = cmd;
-                    da.Fill(dt);
+                    using (MySqlCommand cmd = new MySqlCommand())
+                    {
+                        PrepareCommand(cmd, sql, conn, cmdType, commandParameters, tran, CommandTimeout);
+                        MySqlDataAdapter da = new MySqlDataAdapter();
+                        da.SelectCommand = cmd;
+                        da.Fill(dt);
+                    }
                 }
             }
             catch (Exception ex)
@@ -282,11 +325,14 @@ namespace DBHelper
             IEnumerable<T> Ienum;
             try
             {
-                using (MySqlCommand cmd = new MySqlCommand())
+                using (MySqlConnection conn = GetConnection(connectionStringName))
                 {
-                    PrepareCommand(cmd, sql, connectionStringName, cmdType, commandParameters, tran, CommandTimeout);
-                    MySqlDataReader sdr = cmd.ExecuteReader(CommandBehavior.CloseConnection);
-                    Ienum = ToIEnumerable<T>(sdr);
+                    using (MySqlCommand cmd = new MySqlCommand())
+                    {
+                        PrepareCommand(cmd, sql, conn, cmdType, commandParameters, tran, CommandTimeout);
+                        MySqlDataReader sdr = cmd.ExecuteReader(CommandBehavior.CloseConnection);
+                        Ienum = ToIEnumerable<T>(sdr);
+                    }
                 }
             }
             catch (Exception ex)

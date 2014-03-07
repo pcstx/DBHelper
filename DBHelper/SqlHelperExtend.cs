@@ -68,6 +68,50 @@ namespace DBHelper
             }
         }
 
+        public static int InsertReturnID<T>(T t, string TableName = null)
+        {
+            string sql = @" INSERT INTO {0}
+                                    ({1})
+                                VALUES
+                                    ({2}) ;
+                                SELECT @@IDENTITY AS ID 
+                            ";
+            string attributes = "";
+            string attributesValue = "";
+            SqlParameterCollection sqlParamCollection = new SqlCommand().Parameters;
+            Type type = typeof(T);
+            PropertyInfo[] pi = type.GetProperties();
+
+            foreach (PropertyInfo p in pi)
+            {
+                bool hasAutoIncre = Attribute.IsDefined(p, typeof(CustomAttributes.AutoIncre)); //判断是否是[自增长]特性
+                bool hasInvalid = Attribute.IsDefined(p, typeof(CustomAttributes.Invalid)); //判断是否是[无效]特性
+                object value = p.GetValue(t, null);
+                string name = p.Name;
+                if (value != null && !hasAutoIncre && !hasInvalid)
+                {
+                    attributes += name + ",";
+                    attributesValue += "@" + name + ",";
+                    sqlParamCollection.Add(new SqlParameter("@" + name, value));
+                }
+            }
+
+            attributes = DelLastChar(attributes);
+            attributesValue = DelLastChar(attributesValue);
+
+            if (string.IsNullOrEmpty(TableName))
+            {
+                Attribute attr = Attribute.GetCustomAttribute(type, typeof(CustomAttributes.TableName));
+                CustomAttributes.TableName a = (CustomAttributes.TableName)attr;
+                TableName = a.GetTableName();
+            }
+            sql = string.Format(sql, TableName, attributes, attributesValue);
+ 
+            int result =CommonType.ToInt(SqlHelper.ExecuteScalar(sql, null, System.Data.CommandType.Text, sqlParamCollection));
+
+            return result;
+        }
+
         /// <summary>
         /// 根据主键更新单表
         /// </summary>
@@ -89,7 +133,7 @@ namespace DBHelper
             PropertyInfo[] pi = type.GetProperties();
 
             //T where;
-            if (whereT != null)
+            if (string.IsNullOrEmpty(whereT))
             {
                 wherecondition += (string)whereT;  
             } 
@@ -106,7 +150,7 @@ namespace DBHelper
                     attributes += name + "=" + "@" + name + ",";
                     sqlParamCollection.Add(new SqlParameter("@" + name, value));
                 }
-                if (whereT==null)
+                if (string.IsNullOrEmpty(whereT))
                 {
                     bool hasKey = Attribute.IsDefined(p, typeof(CustomAttributes.Key));
                     if (hasKey)

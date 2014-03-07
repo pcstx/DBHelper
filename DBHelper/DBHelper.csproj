@@ -9,8 +9,10 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>DBHelper</RootNamespace>
     <AssemblyName>DBHelper</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile>
+    </TargetFrameworkProfile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -52,6 +54,8 @@
     <Compile Include="MysqlHelper.cs" />
     <Compile Include="MysqlHelperExtend.cs" />
     <Compile Include="MysqlParameters.cs" />
+    <Compile Include="OleDbHelper.cs" />
+    <Compile Include="OleDbParameters.cs" />
     <Compile Include="PagingParam.cs" />
     <Compile Include="SqlParameters.cs" />
     <Compile Include="SqlHelper.cs" />
