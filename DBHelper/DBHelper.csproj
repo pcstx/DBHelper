@@ -57,6 +57,7 @@
     <Compile Include="OleDbHelper.cs" />
     <Compile Include="OleDbParameters.cs" />
     <Compile Include="PagingParam.cs" />
+    <Compile Include="SqlHelperSchema.cs" />
     <Compile Include="SqlParameters.cs" />
     <Compile Include="SqlHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

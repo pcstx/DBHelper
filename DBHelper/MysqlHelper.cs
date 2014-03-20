@@ -128,14 +128,14 @@ namespace DBHelper
             MySqlDataReader sdr;
             try
             {
-                using (MySqlConnection conn = GetConnection(connectionStringName))
-                {
+                MySqlConnection conn = GetConnection(connectionStringName);
+                
                     using (MySqlCommand cmd = new MySqlCommand())
                     {
                         PrepareCommand(cmd, sql, conn, cmdType, commandParameters, tran, CommandTimeout);
                         sdr = cmd.ExecuteReader(CommandBehavior.CloseConnection);
                     }
-                }
+                
             }
             catch (Exception ex)
             {
@@ -155,8 +155,8 @@ namespace DBHelper
             MySqlDataReader sdr = null;
             try
             {
-                using (MySqlConnection conn = GetConnection(connectionStringName))
-                {
+                MySqlConnection conn = GetConnection(connectionStringName);
+                
                     using (MySqlCommand cmd = new MySqlCommand())
                     {
                         PrepareCommand(cmd, sql, conn, cmdType, commandParameters, tran, CommandTimeout);
@@ -167,7 +167,7 @@ namespace DBHelper
                         }
                         sdr = cmd.EndExecuteReader(asyncResult);
                     }
-                }
+                
             }
             catch (Exception ex)
             {
@@ -224,7 +224,7 @@ namespace DBHelper
         /// <param name="tran"></param>
         /// <param name="CommandTimeout"></param>
         /// <returns></returns>
-        public static T ExecuteFirst<T>(string sql, string connectionStringName = null, CommandType cmdType = CommandType.Text, MySqlParameterCollection commandParameters = null, MySqlTransaction tran = null, int CommandTimeout = 30)
+        public static T ExecuteObject<T>(string sql, string connectionStringName = null, CommandType cmdType = CommandType.Text, MySqlParameterCollection commandParameters = null, MySqlTransaction tran = null, int CommandTimeout = 30)
         {
             object first = ExecuteScalar(sql, connectionStringName, cmdType, commandParameters, tran, CommandTimeout);
             if (first is T)
@@ -237,9 +237,9 @@ namespace DBHelper
             }
         }
 
-        public static T ExecuteFirst<T>(string sql, MysqlParameters param)
+        public static T ExecuteObject<T>(string sql, MysqlParameters param)
         {
-            return ExecuteFirst<T>(sql, param.connectionStringName, param.cmdType, param.commandParameters, param.tran, param.CommandTimeout);
+            return ExecuteObject<T>(sql, param.connectionStringName, param.cmdType, param.commandParameters, param.tran, param.CommandTimeout);
         }
 
         /// <summary>
@@ -324,16 +324,9 @@ namespace DBHelper
         {
             IEnumerable<T> Ienum;
             try
-            {
-                using (MySqlConnection conn = GetConnection(connectionStringName))
-                {
-                    using (MySqlCommand cmd = new MySqlCommand())
-                    {
-                        PrepareCommand(cmd, sql, conn, cmdType, commandParameters, tran, CommandTimeout);
-                        MySqlDataReader sdr = cmd.ExecuteReader(CommandBehavior.CloseConnection);
-                        Ienum = ToIEnumerable<T>(sdr);
-                    }
-                }
+            {  
+                MySqlDataReader sdr =(MySqlDataReader)ExecuteReader(sql, connectionStringName, cmdType, commandParameters, tran, CommandTimeout);
+                Ienum = ToIEnumerable<T>(sdr); 
             }
             catch (Exception ex)
             {

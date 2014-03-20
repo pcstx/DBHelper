@@ -57,5 +57,24 @@ namespace DBHelper
            return value;
        }
 
+       public static bool ToBool(object obj, bool defaultValue = false)
+       {
+           bool value = false;
+           try
+           {
+               if (!(obj != null && Boolean.TryParse(obj.ToString(),out value)))
+               {
+                   value = defaultValue;
+               }
+           }
+           catch
+           {
+               value = defaultValue;
+           }
+
+           return value;
+       
+       }
+
     }
 }

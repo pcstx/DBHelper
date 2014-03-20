@@ -149,14 +149,12 @@ namespace DBHelper
             OleDbDataReader sdr;
             try
             {
-                using (OleDbConnection conn = GetConnection(connectionStringName))
-                {
+                    OleDbConnection conn = GetConnection(connectionStringName);                
                     using (OleDbCommand cmd = new OleDbCommand())
                     {
                         PrepareCommand(cmd, sql, conn, cmdType, commandParameters, tran, CommandTimeout);
                         sdr = cmd.ExecuteReader(CommandBehavior.CloseConnection);
-                    }
-                }
+                    }                
             }
             catch (Exception ex)
             {
@@ -247,7 +245,7 @@ namespace DBHelper
         /// <param name="tran"></param>
         /// <param name="CommandTimeout"></param>
         /// <returns></returns>
-        public static T ExecuteFirst<T>(string sql, string connectionStringName = null, CommandType cmdType = CommandType.Text, OleDbParameterCollection commandParameters = null, OleDbTransaction tran = null, int CommandTimeout = 30)
+        public static T ExecuteObject<T>(string sql, string connectionStringName = null, CommandType cmdType = CommandType.Text, OleDbParameterCollection commandParameters = null, OleDbTransaction tran = null, int CommandTimeout = 30)
         {
             object first = ExecuteScalar(sql, connectionStringName, cmdType, commandParameters, tran, CommandTimeout);
             if (first is T)
@@ -260,9 +258,9 @@ namespace DBHelper
             }
         }
 
-        public static T ExecuteFirst<T>(string sql, OleDbParameters param)
+        public static T ExecuteObject<T>(string sql, OleDbParameters param)
         {
-            return ExecuteFirst<T>(sql, param.connectionStringName, param.cmdType, param.commandParameters, param.tran, param.CommandTimeout);
+            return ExecuteObject<T>(sql, param.connectionStringName, param.cmdType, param.commandParameters, param.tran, param.CommandTimeout);
         }
 
         /// <summary>
@@ -350,17 +348,9 @@ namespace DBHelper
         {
             IEnumerable<T> Ienum;
             try
-            {
-                using (OleDbConnection conn = GetConnection(connectionStringName))
-                {
-                    using(OleDbCommand cmd = new OleDbCommand())
-                    {
-                        PrepareCommand(cmd, sql, conn, cmdType, commandParameters, tran, CommandTimeout);
-                        //  cmd.Connection = conn;
-                        OleDbDataReader sdr = cmd.ExecuteReader();// cmd.ExecuteReader(CommandBehavior.CloseConnection);
-                        Ienum = ToIEnumerable<T>(sdr);
-                    }
-                }
+            { 
+                OleDbDataReader sdr = (OleDbDataReader)ExecuteReader(sql, connectionStringName, cmdType, commandParameters, tran, CommandTimeout);
+                Ienum = ToIEnumerable<T>(sdr); 
             }
             catch (Exception ex)
             {
