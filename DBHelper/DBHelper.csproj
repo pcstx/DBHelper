@@ -50,6 +50,8 @@
     <Compile Include="CustomAttributes\AutoIncre.cs" />
     <Compile Include="CustomAttributes\Invalid.cs" />
     <Compile Include="CustomAttributes\Key.cs" />
+    <Compile Include="CustomAttributes\MaxLength.cs" />
+    <Compile Include="CustomAttributes\MinLength.cs" />
     <Compile Include="CustomAttributes\TableName.cs" />
     <Compile Include="MysqlHelper.cs" />
     <Compile Include="MysqlHelperExtend.cs" />
