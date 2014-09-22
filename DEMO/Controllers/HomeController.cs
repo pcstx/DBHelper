@@ -42,7 +42,7 @@ namespace DEMO.Controllers
 
         public ActionResult About()
         {
-            SqlHelper.connectionString = @"server=PC;uid=sa;pwd=sa;";
+           // SqlHelper.connectionString = @"server=PC;uid=sa;pwd=sa;";
             string sql = @" INSERT INTO website.[dbo].[Other]([Name]) VALUES ('pcstx');select @@identity; ";
 
        object i= SqlHelper.ExecuteScalar(sql);

@@ -38,7 +38,6 @@ namespace DBHelper
             {
                 connstr = ConnectionString.connectionString(connectionStringName);
             } 
-
             SqlConnection conn = new SqlConnection(connstr);
             conn.Open();
             return conn;        

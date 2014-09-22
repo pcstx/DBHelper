@@ -38,7 +38,14 @@ namespace DBHelper
             }
             else
             {
-                return ConfigurationManager.ConnectionStrings[connectionStringName].ConnectionString;
+                if (ConfigurationManager.ConnectionStrings[connectionStringName] != null)
+                {
+                    return ConfigurationManager.ConnectionStrings[connectionStringName].ConnectionString;
+                }
+                else
+                {
+                    return connectionString();
+                }
             }
             
         } 
